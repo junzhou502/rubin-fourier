@@ -53,11 +53,8 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     # ------------------------------------------------------------------------
 
     ci.initial_setup()
-    
     ci.init_probes(possible_probes=self.probe)
-
     ci.init_binning(int(self.ncl),int(self.l_min),int(self.l_max),int(self.l_max_shear))
-
     ci.init_ggl_exclude(np.array(self.ggl_exclude).flatten())
 
     if self.debug:
