@@ -3,8 +3,8 @@ debug: False
 stop_at_error: True
 
 likelihood:
-  roman_fourier.roman_fourier_3x2pt:
-    ### Here you can overwrite options in roman_fourier_${probe}.yaml
+  #roman_fourier.combo_2x2pt:
+  roman_fourier.combo_3x2pt:
     path: ./external_modules/data/roman_fourier
     data_file: roman_example.dataset # this assumes lens = source
     accuracyboost: 1.0
@@ -17,11 +17,7 @@ likelihood:
     # 0 NO IA, 1 IA_NLA_LF, 2 IA_REDSHIFT_BINNING, 3 IA_REDSHIFT_EVOLUTION
     IA_redshift_evolution: 3
     debug: True
-
 params:
-  # ----------------------------------------------------------------------------
-  # ------------------------------ COSMOLOGICAL PARAMETERS ---------------------
-  # ----------------------------------------------------------------------------
   As_1e9:
     prior:
       min: 0.5
@@ -561,4 +557,4 @@ sampler:
       w0pwa: -1.0
       w: -1.0
 
-output: ./projects/roman_fourier/chains/EXAMPLE_EVALUATE1
+output: ./projects/roman_fourier/chains/EXAMPLE_EVALUATE2
