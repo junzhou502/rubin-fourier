@@ -3,8 +3,7 @@ debug: False
 stop_at_error: True
 
 likelihood:
-  roman_fourier.roman_fourier_3x2pt:
-    ### Here you can overwrite options in roman_fourier_${probe}.yaml
+  roman_fourier.cosmic_shear:
     path: ./external_modules/data/roman_fourier
     data_file: roman_example.dataset # this assumes lens = source
     accuracyboost: 1.0
@@ -16,12 +15,11 @@ likelihood:
     IA_model: 0
     # 0 NO IA, 1 IA_NLA_LF, 2 IA_REDSHIFT_BINNING, 3 IA_REDSHIFT_EVOLUTION
     IA_redshift_evolution: 3
-    debug: True
-
+    debug: false
+    create_baryon_pca: false
+    baryon_pca_select_sims: "antilles-2-99/antilles-101-378/antilles-380-400"
+    filename_baryon_pca: "./projects/lsst_y1/chains/pca.txt"
 params:
-  # ----------------------------------------------------------------------------
-  # ------------------------------ COSMOLOGICAL PARAMETERS ---------------------
-  # ----------------------------------------------------------------------------
   As_1e9:
     prior:
       min: 0.5
@@ -29,8 +27,8 @@ params:
     ref:
       dist: norm
       loc: 2.1
-      scale: 0.65
-    proposal: 0.4
+      scale: 0.2
+    proposal: 0.2
     latex: 10^9 A_\mathrm{s})
     drop: true
     renames: A
@@ -72,8 +70,8 @@ params:
     ref:
       dist: norm
       loc: 0.316
-      scale: 0.02
-    proposal: 0.02
+      scale: 0.015
+    proposal: 0.015
     latex: \Omega_\mathrm{m}
     drop: true
   mnu:
@@ -395,116 +393,6 @@ params:
     #  scale: 0.15
     #proposal: 0.1
     latex: A_\mathrm{BTA-IA,Roman}^1
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  # implementing lens = source
-  roman_DZ_L1:
-    value: 'lambda roman_DZ_S1: roman_DZ_S1'
-    latex: \Delta z_\mathrm{l,Roman}^1
-  roman_DZ_L2:
-    value: 'lambda roman_DZ_S2: roman_DZ_S2'
-    latex: \Delta z_\mathrm{l,Roman}^1
-  roman_DZ_L3:
-    value: 'lambda roman_DZ_S3: roman_DZ_S3'
-    latex: \Delta z_\mathrm{l,Roman}^1
-  roman_DZ_L4:
-    value: 'lambda roman_DZ_S4: roman_DZ_S4'
-    latex: \Delta z_\mathrm{l,Roman}^1
-  roman_DZ_L5:
-    value: 'lambda roman_DZ_S5: roman_DZ_S5'
-    latex: \Delta z_\mathrm{l,Roman}^1
-  roman_DZ_L6:
-    value: 'lambda roman_DZ_S6: roman_DZ_S6'
-    latex: \Delta z_\mathrm{l,Roman}^1
-  roman_DZ_L7:
-    value: 'lambda roman_DZ_S7: roman_DZ_S7'
-    latex: \Delta z_\mathrm{l,Roman}^1
-  roman_DZ_L8:
-    value: 'lambda roman_DZ_S8: roman_DZ_S8'
-    latex: \Delta z_\mathrm{l,Roman}^1
-  # ------------------------------------------------------------------------
-  # ------------------------------------------------------------------------
-  # Bin bias parameters
-  roman_B1_1:
-    prior:
-      min: 0.4
-      max: 4
-    ref:
-      dist: norm
-      loc: 1.24
-      scale: 0.15
-    proposal: 0.1
-    latex: b_\mathrm{1-Roman}^1
-  roman_B1_2:
-    prior:
-      min: 0.4
-      max: 4
-    ref:
-      dist: norm
-      loc: 1.36
-      scale: 0.15
-    proposal: 0.1
-    latex: b_\mathrm{1-Roman}^2
-  roman_B1_3:
-    prior:
-      min: 0.4
-      max: 4
-    ref:
-      dist: norm
-      loc: 1.47
-      scale: 0.15
-    proposal: 0.1
-    latex: b_\mathrm{1-Roman}^3
-  roman_B1_4:
-    prior:
-      min: 0.4
-      max: 4
-    ref:
-      dist: norm
-      loc: 1.60
-      scale: 0.15
-    proposal: 0.1
-    latex: b_\mathrm{1-Roman}^4
-  roman_B1_5:
-    prior:
-      min: 0.4
-      max: 4
-    ref:
-      dist: norm
-      loc: 1.76
-      scale: 0.1
-    proposal: 0.1
-    latex: b_\mathrm{1-Roman}^5
-  roman_B1_6:
-    prior:
-      min: 0.4
-      max: 4
-    ref:
-      dist: norm
-      loc: 1.47
-      scale: 0.15
-    proposal: 0.1
-    latex: b_\mathrm{1-Roman}^6
-  roman_B1_7:
-    prior:
-      min: 0.4
-      max: 4
-    ref:
-      dist: norm
-      loc: 1.60
-      scale: 0.15
-    proposal: 0.1
-    latex: b_\mathrm{1-Roman}^7
-  roman_B1_8:
-    prior:
-      min: 0.4
-      max: 4
-    ref:
-      dist: norm
-      loc: 1.76
-      scale: 0.1
-    proposal: 0.1
-    latex: b_\mathrm{1-Roman}^8
 
 theory:
   camb:
@@ -513,14 +401,13 @@ theory:
     use_renames: True
     extra_args:
       halofit_version: takahashi
-      AccuracyBoost: 1.1
+      AccuracyBoost: 1.0
       lens_potential_accuracy: 1.0
       num_massive_neutrinos: 1
       nnu: 3.046
       dark_energy_model: ppf
       accurate_massive_neutrino_transfers: false
-      k_per_logint: 20
-      #AccuracyBoost: 2.0
+      k_per_logint: 10
 
 sampler:
   evaluate:
@@ -532,14 +419,6 @@ sampler:
       omegab: 0.04
       omegam: 0.3
       mnu: 0.06
-      roman_B1_1: 1.4
-      roman_B1_2: 1.5
-      roman_B1_3: 1.6
-      roman_B1_4: 1.7
-      roman_B1_5: 1.8
-      roman_B1_6: 1.9
-      roman_B1_7: 2.0
-      roman_B1_8: 2.1
       roman_DZ_S1: 0.0
       roman_DZ_S2: 0.0
       roman_DZ_S3: 0.0
@@ -561,4 +440,4 @@ sampler:
       w0pwa: -1.0
       w: -1.0
 
-output: ./projects/roman_fourier/chains/EXAMPLE_EVALUATE1
+output: ./projects/roman_fourier/chains/EXAMPLE_EVALUATE2

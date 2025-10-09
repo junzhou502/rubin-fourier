@@ -50,15 +50,16 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
   m.def("init_accuracy_boost",
       &cosmolike_interface::init_accuracy_boost,
       "Init accuracy and sampling Boost (may slow down Cosmolike a lot)",
-      py::arg("accuracy_boost").none(false),
-      py::arg("sampling_boost").none(false),
-      py::arg("integration_accuracy").none(false)
+      (py::arg("accuracy_boost") = 1.0).none(false),
+      (py::arg("integration_accuracy") = 1).none(false)
     );
 
   m.def("init_baryons_contamination",
-      &cosmolike_interface::init_baryons_contamination,
+      py::overload_cast<std::string, std::string>(
+         &cosmolike_interface::init_baryons_contamination),
       "Init data vector contamination (on the matter power spectrum) with baryons",
-      py::arg("sim").none(false)
+      py::arg("sim").none(false),
+      py::arg("allsims").none(false)
     );
 
   m.def("init_bias", 
@@ -85,8 +86,7 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
   m.def("init_data_fourier",
       [](std::string cov, std::string mask, std::string data) {
         using namespace cosmolike_interface;
-        arma::Col<int>::fixed<3> order = {0, 1, 2};
-        init_data_3x2pt_fourier_space(cov, mask, data, order);
+        init_data_Mx2pt_N<1,3>(cov, mask, data, {0, 1, 2});
       },
       "Load covariance matrix, mask (vec of 0/1s) and data vector",
       py::arg("COV").none(false),
@@ -151,14 +151,12 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
          arma::Col<double> io_chi)
       {
         spdlog::debug("\x1b[90m{}\x1b[0m: Begins", "set_cosmology");
-
         using namespace cosmolike_interface;
         set_cosmological_parameters(omega_matter, hubble);
         set_linear_power_spectrum(io_log10k_2D,io_z_2D,io_lnP_linear);
         set_non_linear_power_spectrum(io_log10k_2D,io_z_2D,io_lnP_nonlinear);
         set_growth(io_z_2D,io_G);
         set_distances(io_z_1D,io_chi);
-
         spdlog::debug("\x1b[90m{}\x1b[0m: Ends", "set_cosmology");
       },
       "Set Cosmological Paramters, Distance, Matter Power Spectrum, Growth Factor",
@@ -258,20 +256,32 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
       &reset_bary_struct,
        "Set the Baryon Functions to not contaminate the MPS w/ Baryon effects"
     );
-  
+
+  // --------------------------------------------------------------------
+  // COMPUTE FUNCTIONS (relevant for emulators)
+  // --------------------------------------------------------------------
+  m.def("compute_data_vector_3x2pt_fourir_sizes",
+      []()->std::vector<int> {
+        using namespace cosmolike_interface;
+        using namespace arma;
+        using stlvec = std::vector<int>;
+        return conv_to<stlvec>::from(compute_data_vector_Mx2pt_N_sizes<1,3>());
+      },
+      "Returns the data vector sizes of each 2pt correlation function",
+      py::return_value_policy::move
+    );
+
   // --------------------------------------------------------------------
   // COMPUTE FUNCTIONS
   // --------------------------------------------------------------------
-
   m.def("compute_data_vector_masked",
       // Why return an STL vector?
       // The conversion between STL vector and python np array is cleaner
       // arma:Col is cast to 2D np array with 1 column (not as nice!)
       []()->std::vector<double> {
         using namespace cosmolike_interface;
-        arma::Col<int>::fixed<3> O = {0, 1, 2};
-        arma::Col<double> res = compute_data_vector_3x2pt_fourier_masked_any_order(O);
-        return arma::conv_to<std::vector<double>>::from(res);
+        using stlvec = std::vector<double>;
+        return arma::conv_to<stlvec>::from(compute_Mx2pt_N_masked<1,3>({0,1,2}));
       },
       "Compute theoretical data vector. Masked dimensions are filled w/ zeros",
       py::return_value_policy::move
@@ -283,9 +293,9 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
       // arma:Col is cast to 2D np array with 1 column (not as nice!)
       [](std::vector<double> Q)->std::vector<double> {
         using namespace cosmolike_interface;
-        arma::Col<int>::fixed<3> O = {0, 1, 2};
-        arma::Col<double> res = compute_data_vector_3x2pt_fourier_masked_any_order(Q,O);
-        return arma::conv_to<std::vector<double>>::from(res);
+        using stlvec = std::vector<double>;
+        arma::Col<double> res = compute_Mx2pt_N_masked<1,3>({0,1,2});
+        return arma::conv_to<stlvec>::from(compute_add_baryons_pcs(Q,res));
       },
       "Compute theoretical data vector, including contributions from baryonic"
       " principal components. Masked dimensions are filled w/ zeros",
@@ -303,15 +313,15 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
     );
 
   m.def("compute_baryon_pcas",
-      [](std::string scenarios) {
+      [](std::string scenarios, std::string allsims) {
         using namespace cosmolike_interface;
-        arma::Col<int>::fixed<3> order = {0, 1, 2};
-        BaryonScenario::get_instance().set_scenarios(scenarios);
-        return cosmolike_interface::compute_baryon_pcas_3x2pt_fourier(order);
+        BaryonScenario::get_instance().set_scenarios(allsims, scenarios);
+        return compute_baryon_pcas_Mx2pt_N<1,3>({0,1,2});
       },
       "Compute baryonic principal components given a list of scenarios" 
       "that contaminate the matter power spectrum",
       py::arg("scenarios").none(false),
+      py::arg("allsims").none(false),
       py::return_value_policy::move
     );
 
