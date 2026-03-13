@@ -15,9 +15,9 @@ from getdist import IniFile
 import euclidemu2 as ee2
 import math
 
-import cosmolike_roman_fourier_interface as ci
+import cosmolike_lsst_fourier_interface as ci
 
-survey = "roman"
+survey = "LSST"
 
 class _cosmolike_prototype_base(DataSetLikelihood):
 
@@ -52,7 +52,20 @@ class _cosmolike_prototype_base(DataSetLikelihood):
     self.len_log10k_interp_2D = len(self.log10k_interp_2D)
     # ------------------------------------------------------------------------
 
-    ci.initial_setup()
+    ci.initial_setup(
+      self.adopt_limber_gg,
+      self.adopt_limber_gs,
+      self.adopt_RSD_gg,
+      self.adopt_RSD_gs,
+      self.NCell_interpolation,
+      self.Na_interpolation,)
+    
+    self.log.info(' adopt_limber_gg = %d ', self.adopt_limber_gg)
+    self.log.info(' adopt_limber_gs = %d ', self.adopt_limber_gs)
+    self.log.info(' adopt_RSD_gg = %d ', self.adopt_RSD_gg)
+    self.log.info(' adopt_RSD_gs = %d ', self.adopt_RSD_gs)
+    self.log.info(' NCell_interpolation = %d ', self.NCell_interpolation)
+    self.log.info(' Na_interpolation = %d ', self.Na_interpolation)
     ci.init_probes(possible_probes=self.probe)
     ci.init_binning(int(self.ncl),int(self.l_min),int(self.l_max),int(self.l_max_shear))
     ci.init_ggl_exclude(np.array(self.ggl_exclude).flatten())

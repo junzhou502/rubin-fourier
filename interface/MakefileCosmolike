@@ -144,7 +144,7 @@ endif
 LDLIBS += -lm
 
 all:  shared
-shared: cosmolike_roman_fourier_interface.so
+shared: cosmolike_lsst_fourier_interface.so
 
 CSOURCES += \
 		${ROOTDIR}/external_modules/code/cfftlog/cfftlog.c \
@@ -198,7 +198,7 @@ $(OBJECTC): $(CSOURCES)
 $(OBJECTCPP): $(CPPSOURCES)
 	$(CXX) $(CXXFLAGS) -fPIC -c $(CPPSOURCES)
 
-cosmolike_roman_fourier_interface.so: $(OBJECTC) $(OBJECTCPP)
+cosmolike_lsst_fourier_interface.so: $(OBJECTC) $(OBJECTCPP)
 	$(CXX) $(CXXFLAGS) -DCOBAYA_SAMPLER $(SOFLAG) -fPIC -o $@ \
 	      $(OBJECTC) $(OBJECTCPP) interface.cpp \
 	      $(LDFLAGS) $(INSTALL_NAME_FLAG) $(LDLIBS)
@@ -210,4 +210,4 @@ test: $(OBJECTC) $(CSOURCES) $(OBJECTCPP) interface.cpp
 		$(LDFLAGS) $(LDLIBS)
 
 clean:
-	@rm -rf test cosmolike_roman_fourier_interface.so cosmolike_roman_fourier_interface.so.dSYM  *.o
+	@rm -rf test cosmolike_lsst_fourier_interface.so cosmolike_lsst_fourier_interface.so.dSYM  *.o

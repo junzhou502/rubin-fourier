@@ -39,9 +39,9 @@ namespace py = pybind11;
 #include "cosmolike/generic_interface.hpp"
 #include "cosmolike/cosmo2D_wrapper.hpp"
 
-PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
+PYBIND11_MODULE(cosmolike_lsst_fourier_interface, m)
 {
-  m.doc() = "CosmoLike Interface for Roman-Y1 Fourier Space 3x2pt Module";
+  m.doc() = "CosmoLike Interface for LSST-Y1 Fourier Space 3x2pt Module";
 
   // --------------------------------------------------------------------
   // INIT FUNCTIONS
@@ -115,7 +115,13 @@ PYBIND11_MODULE(cosmolike_roman_fourier_interface, m)
 
   m.def("initial_setup",
       &cosmolike_interface::initial_setup,
-      "Initialize Cosmolike Variables to their Default Values"
+      "Initialize Cosmolike Variables to their Default Values",
+      py::arg("adopt_limber_gg").none(false).noconvert(),
+      py::arg("adopt_limber_gs").none(false).noconvert(),
+      py::arg("adopt_RSD_gg").none(false).noconvert(),
+      py::arg("adopt_RSD_gs").none(false).noconvert(),
+      py::arg("NCell_interpolation").none(false).noconvert(),
+      py::arg("Na_interpolation").none(false).noconvert()
     );
 
   m.def("init_redshift_distributions_from_files",
